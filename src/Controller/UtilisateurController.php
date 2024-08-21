@@ -16,8 +16,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
 
 #[Route('/utilisateur')]
 class UtilisateurController extends AbstractController
@@ -25,15 +23,10 @@ class UtilisateurController extends AbstractController
     #[Route('/', name: 'app_utilisateur_index', methods: ['GET'])]
     public function index(UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer): Response
     {
-
         $users = $utilisateurRepository->findAll();
-
         $jsonUsers = $serializer->serialize($users, 'json', ['groups' => 'Utilisateur']);
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
-
-
-
 
     #[Route('/{id}', name: 'app_utilisateur_show', methods: ['GET'])]
     public function show(Utilisateur $utilisateur, SerializerInterface $serializer): Response
@@ -47,54 +40,49 @@ class UtilisateurController extends AbstractController
     {
         $login = $request->get('login');
         $password = $request->get('password');
-        // dd($request);
 
-        $user = $utilisateurRepository->findOneBy(['mail'=>$login, 'motDePasse'=>$password]);
+        // Hachage du mot de passe saisi par l'utilisateur avec SHA-256
+        $hashedPassword = hash('sha256', $password);
+
+        // Recherche de l'utilisateur avec l'adresse email et le mot de passe haché
+        $user = $utilisateurRepository->findOneBy(['mail' => $login, 'motDePasse' => $hashedPassword]);
 
         $jsonUsers = $serializer->serialize($user, 'json', ['groups' => 'CheckUser']);
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
-        // return new JsonResponse($user, Response::HTTP_OK, [], true);
     }
-
 
     #[Route('/user/SearchUser', name: 'app_utilisateur_search_user', methods: ['POST'])]
     public function getSearchUser(Request $request, UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer): Response
     {
-        
         $valueUser = $request->getContent();
         $data = json_decode($valueUser, true);
 
-        if(empty($data['nom']) && empty($data['prenom'])){
+        if (empty($data['nom']) && empty($data['prenom'])) {
             $users = array();
-        }else{
+        } else {
             $users = $utilisateurRepository->getListSearchUser($data['nom'], $data['prenom']);
         }
-        
+
         $jsonUsers = $serializer->serialize($users, 'json');
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
-
-
-
-
     #[Route('/', name: 'app_utilisateur_new', methods: ['POST'])]
     public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, RoleRepository $roleRepository): JsonResponse
     {
-
-
         $utilisateur = $serializer->deserialize($request->getContent(), Utilisateur::class, 'json');
 
-        // Récupération de l'ensemble des données envoyées sous forme de tableau
         $content = $request->toArray();
-
         $idRole = $content['id_role'] ?? 1;
         $dateTime = new DateTime('now', new DateTimeZone('Europe/Paris'));
-
 
         $utilisateur->setRole($roleRepository->find($idRole));
         $utilisateur->setDateCreation($dateTime);
         $utilisateur->setEstActive(true);
+
+        // Hachage du mot de passe avant de le stocker
+        $hashedPassword = hash('sha256', $utilisateur->getMotDePasse());
+        $utilisateur->setMotDePasse($hashedPassword);
 
         $em->persist($utilisateur);
         $em->flush();
@@ -103,13 +91,6 @@ class UtilisateurController extends AbstractController
         $location = $urlGenerator->generate('app_utilisateur_show', ['id' => $utilisateur->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         return new JsonResponse($jsonBook, Response::HTTP_CREATED, ["Location" => $location], true);
     }
-
-
-
-
-
-
-
 
     #[Route('/{id}', name: 'app_utilisateur_edit', methods: ['PUT'])]
     public function edit(Request $request, SerializerInterface $serializer, Utilisateur $currentUtilisateur, EntityManagerInterface $em, RoleRepository $authorRepository): JsonResponse
@@ -125,12 +106,13 @@ class UtilisateurController extends AbstractController
         $idRole = $content['id_role'] ?? 1;
         $updatedUtilisateur->setRole($authorRepository->find($idRole));
 
-        if(isset($content['motDePasse'])){
-            if(empty($content['motDePasse'])){
-                $updatedUtilisateur->setMotDePasse($psw);
-            }
+        // Hachage du nouveau mot de passe si présent
+        if (isset($content['motDePasse']) && !empty($content['motDePasse'])) {
+            $hashedPassword = hash('sha256', $content['motDePasse']);
+            $updatedUtilisateur->setMotDePasse($hashedPassword);
+        } else {
+            $updatedUtilisateur->setMotDePasse($psw);
         }
-        
 
         $em->persist($updatedUtilisateur);
         $em->flush();
@@ -138,15 +120,9 @@ class UtilisateurController extends AbstractController
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
-
-
-
-
-
     #[Route('/{id}', name: 'app_utilisateur_delete', methods: ['DELETE'])]
     public function delete(Request $request, Utilisateur $utilisateur, EntityManagerInterface $entityManager): Response
     {
-
         $entityManager->remove($utilisateur);
         $entityManager->flush();
 
