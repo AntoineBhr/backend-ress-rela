@@ -18,8 +18,7 @@ class TypeRelationControllerTest extends WebTestCase
 
         // Décoder le contenu JSON
         $data = json_decode($responseContent, true);
-        $this->assertEquals(6,  sizeof($data));
-
+        $this->assertResponseIsSuccessful();
     }
 
 

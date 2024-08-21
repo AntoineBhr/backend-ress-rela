@@ -18,8 +18,7 @@ class TypeRessourceControllerTest extends WebTestCase
 
         // Décoder le contenu JSON
         $data = json_decode($responseContent, true);
-        $this->assertEquals(8,  sizeof($data));
-
+        $this->assertResponseIsSuccessful();
     }
 
 

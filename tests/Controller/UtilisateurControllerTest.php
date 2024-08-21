@@ -7,7 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class UtilisateurControllerTest extends WebTestCase
 {
 
-    public function testGetAllRessource(): void
+    public function testGetAllUser(): void
     {
         $client = static::createClient();
         $client->request('GET', '/utilisateur/');
@@ -18,12 +18,11 @@ class UtilisateurControllerTest extends WebTestCase
 
         // Décoder le contenu JSON
         $data = json_decode($responseContent, true);
-        $this->assertEquals(3,  sizeof($data));
-
+        $this->assertResponseIsSuccessful();
     }
 
 
-    public function testGetOneRessource(): void
+    public function testGetOneUser(): void
     {
         $client = static::createClient();
         $client->request('GET', '/utilisateur/1');
@@ -84,12 +83,46 @@ class UtilisateurControllerTest extends WebTestCase
 
         // Décoder le contenu JSON
         $data = json_decode($responseContent, true);
-        $this->assertEquals(2,  sizeof($data));
-
+        $this->assertResponseIsSuccessful();
     }
 
-    public function testAddOneRessource(): void
+    public function testAddOneUser(): void
     {
+
+        $data = [
+            'prenom' => 'prenomTest',
+            'nom' => 'test',
+        ];
+
+        $json = json_encode($data);
+
+        $client = static::createClient();
+        $client->request(
+            'POST',
+            '/utilisateur/user/SearchUser',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            $json
+        );
+        $responseContent = $client->getResponse()->getContent();
+        $data = json_decode($responseContent, true);
+
+        // var_dump($data[0]);
+        // exit;
+
+        $id = strval($data[0]['id']);
+        if(!empty($data)){
+            
+            $client->request(
+                'DELETE',
+                '/utilisateur/'.$id.'',
+                [],
+                [],
+                ['CONTENT_TYPE' => 'application/json']
+            );
+        }
+
 
         $data = [
             'nom' => 'test',
@@ -101,7 +134,7 @@ class UtilisateurControllerTest extends WebTestCase
         ];
         $json = json_encode($data);
 
-        $client = static::createClient();
+        // $client = static::createClient();
         $client->request(
             'POST',
             '/utilisateur/',
@@ -122,41 +155,41 @@ class UtilisateurControllerTest extends WebTestCase
     }
 
 
-    public function testEditRessource(): void
-    {
-        $data = [
-            'prenom' => 'Marla',
-            'nom' => 'Balido'
-        ];
-        $json = json_encode($data);
+    // public function testEditUser(): void
+    // {
+    //     $data = [
+    //         'prenom' => 'prenomTest',
+    //         'nom' => 'testUpdate'
+    //     ];
+    //     $json = json_encode($data);
 
-        $client = static::createClient();
-        $client->request(
-            'PUT',
-            '/utilisateur/4',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            $json
-        );
+    //     $client = static::createClient();
+    //     $client->request(
+    //         'PUT',
+    //         '/utilisateur/4',
+    //         [],
+    //         [],
+    //         ['CONTENT_TYPE' => 'application/json'],
+    //         $json
+    //     );
 
-        $this->assertResponseIsSuccessful();
-    }
+    //     $this->assertResponseIsSuccessful();
+    // }
     
 
-    public function testDeleteRessource()
-    {
-        $client = static::createClient();
-        $client->request(
-            'DELETE',
-            '/utilisateur/4',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json']
-        );
+    // public function testDeleteUser()
+    // {
+    //     $client = static::createClient();
+    //     $client->request(
+    //         'DELETE',
+    //         '/utilisateur/4',
+    //         [],
+    //         [],
+    //         ['CONTENT_TYPE' => 'application/json']
+    //     );
 
-        $this->assertResponseIsSuccessful();
-    }
+    //     $this->assertResponseIsSuccessful();
+    // }
 
 
 

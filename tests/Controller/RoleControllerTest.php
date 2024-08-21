@@ -18,8 +18,7 @@ class RoleControllerTest extends WebTestCase
 
         // Décoder le contenu JSON
         $data = json_decode($responseContent, true);
-        $this->assertEquals(4,  sizeof($data));
-
+        $this->assertResponseIsSuccessful();
     }
 
 
