@@ -18,7 +18,7 @@ jobs:
         image: mysql:5.7
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: ress_rela_sy_test
+          MYSQL_DATABASE: test_db
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -53,6 +53,12 @@ jobs:
       run: |
         ls ./vendor/bin
         ls ./bin
+
+    - name: Create database
+      run: php bin/console --env=test doctrine:database:create
+
+    - name: Create tables
+      run: php bin/console --env=test doctrine:schema:create
 
     - name: Load fixtures
       run: php bin/console --env=test doctrine:fixtures:load --no-interaction
