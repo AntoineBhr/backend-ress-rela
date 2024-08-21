@@ -111,9 +111,9 @@ class UtilisateurControllerTest extends WebTestCase
         // var_dump($data[0]);
         // exit;
 
-        $id = strval($data[0]['id']);
         if(!empty($data)){
-            
+            $id = strval($data[0]['id']);
+
             $client->request(
                 'DELETE',
                 '/utilisateur/'.$id.'',
