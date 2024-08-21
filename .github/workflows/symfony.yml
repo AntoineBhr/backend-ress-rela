@@ -73,3 +73,12 @@ jobs:
       run: ./bin/phpunit --testdox -debug --coverage-text
       env:
         DATABASE_URL: "mysql://root:root@127.0.0.1:3306/test_db"
+
+    - name: SonarQube Scanner
+      uses: sonarsource/sonarcloud-github-action@v1
+      with:
+        projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+        organization: ${{ secrets.SONAR_ORGANIZATION }}
+        token: ${{ secrets.SONAR_TOKEN }}
+      env:
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
