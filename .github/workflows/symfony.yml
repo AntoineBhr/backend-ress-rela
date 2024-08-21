@@ -74,11 +74,11 @@ jobs:
       env:
         DATABASE_URL: "mysql://root:root@127.0.0.1:3306/test_db"
 
-    - name: SonarQube Scanner
-      uses: sonarsource/sonarcloud-github-action@v1
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@v1
       with:
-        projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
-        organization: ${{ secrets.SONAR_ORGANIZATION }}
-        token: ${{ secrets.SONAR_TOKEN }}
-      env:
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        args: >
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
