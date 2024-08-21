@@ -73,20 +73,3 @@ jobs:
       run: ./bin/phpunit --testdox -debug --coverage-text
       env:
         DATABASE_URL: "mysql://root:root@127.0.0.1:3306/test_db"
-
-    - name: Set up JDK 17
-      uses: actions/setup-java@v2
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
-    - name: SonarCloud Scan
-      uses: sonarsource/sonarcloud-github-action@v3.0
-      with:
-        args: >
-          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
