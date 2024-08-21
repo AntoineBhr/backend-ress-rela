@@ -81,7 +81,7 @@ jobs:
         distribution: 'temurin'
 
     - name: SonarCloud Scan
-      uses: sonarsource/sonarcloud-github-action@v1.7
+      uses: sonarsource/sonarcloud-github-action@v3.0
       with:
         args: >
           -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
