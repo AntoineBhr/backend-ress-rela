@@ -56,14 +56,20 @@ jobs:
 
     - name: Create database
       run: php bin/console --env=test doctrine:database:create
+      env:
+        DATABASE_URL: "mysql://root:root@127.0.0.1:3306/test_db"
 
     - name: Create tables
       run: php bin/console --env=test doctrine:schema:create
+      env:
+        DATABASE_URL: "mysql://root:root@127.0.0.1:3306/test_db"
 
     - name: Load fixtures
       run: php bin/console --env=test doctrine:fixtures:load --no-interaction
+      env:
+        DATABASE_URL: "mysql://root:root@127.0.0.1:3306/test_db"
 
     - name: Run PHPUnit tests
       run: ./bin/phpunit --testdox -debug --coverage-text
       env:
-        DATABASE_URL: "mysql://root:root@127.0.0.1:3306/ress_rela_sy_test"
+        DATABASE_URL: "mysql://root:root@127.0.0.1:3306/test_db"
