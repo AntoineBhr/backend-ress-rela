@@ -1,29 +1,36 @@
-FROM php:8.2-fpm
+FROM php:8.2-cli
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    libicu-dev \
-    git \
-    unzip \
-    && docker-php-ext-install pdo pdo_mysql intl
+# Installez les extensions PHP requises
+										  
+			   
+				
+		 
+		   
+RUN docker-php-ext-install pdo pdo_mysql
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Créez un utilisateur non root
+RUN useradd -ms /bin/bash appuser
 
-# Set working directory
+# Copiez les fichiers de l'application
+COPY . /var/www
+
+# Changez le propriétaire des fichiers
+RUN chown -R appuser:appuser /var/www
+
+# Déplacez-vous dans le répertoire de l'application
 WORKDIR /var/www
 
-# Copy application source
-COPY . .
+# Exécutez la première partie de l'installation sans scripts en tant que root
+RUN composer install --prefer-dist --no-scripts --no-progress
 
-# Installez Symfony Runtime
-RUN composer require symfony/runtime
+# Changer l'utilisateur pour appuser
+USER appuser
 
-# Install application dependencies
-RUN composer install --prefer-dist --no-progress --no-scripts
+# Exécutez les scripts manuellement en tant que appuser
+RUN composer run-script post-install-cmd
 
-# Expose port
+# Exposez le port
 EXPOSE 9000
 
+# Commande par défaut
 CMD ["php-fpm"]
