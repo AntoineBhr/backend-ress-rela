@@ -65,15 +65,13 @@
         "symfony/polyfill-php81": "*"
     },
     "scripts": {
-        "auto-scripts": {
-            "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
-        },
         "post-install-cmd": [
-            "@auto-scripts"
+            "php bin/console cache:clear",
+            "php bin/console assets:install"
         ],
         "post-update-cmd": [
-            "@auto-scripts"
+            "php bin/console cache:clear",
+            "php bin/console assets:install"
         ]
     },
     "conflict": {
