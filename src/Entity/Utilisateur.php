@@ -87,6 +87,9 @@ class Utilisateur
     #[ORM\OneToMany(targetEntity: Reponse::class, mappedBy: 'utilisateur')]
     private Collection $reponses;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $apiToken = null;
+
     public function __construct()
     {
         $this->ressources = new ArrayCollection();
@@ -355,6 +358,18 @@ class Utilisateur
                 $reponse->setUtilisateur(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(?string $apiToken): static
+    {
+        $this->apiToken = $apiToken;
 
         return $this;
     }

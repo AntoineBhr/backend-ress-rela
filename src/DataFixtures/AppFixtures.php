@@ -151,6 +151,8 @@ class AppFixtures extends Fixture
             ->setDateCreation($dateTime)
             ->setEstActive(true)
             ->setRole($roleForUser)
+            ->setApiToken(bin2hex(random_bytes(8)))
+
         ;
         $manager->persist($utilisateur1);
 
@@ -164,6 +166,7 @@ class AppFixtures extends Fixture
             ->setDateCreation($dateTime)
             ->setEstActive(true)
             ->setRole($roleForUser)
+            ->setApiToken(bin2hex(random_bytes(8)))
 
         ;
         $manager->persist($utilisateur2);
@@ -177,10 +180,10 @@ class AppFixtures extends Fixture
             ->setDateCreation($dateTime)
             ->setEstActive(true)
             ->setRole($roleForUser)
+            ->setApiToken(bin2hex(random_bytes(8)))
 
         ;
         $manager->persist($utilisateur);
-
 
 
         // //Partie Ressource

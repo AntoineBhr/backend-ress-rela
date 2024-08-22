@@ -79,6 +79,7 @@ class UtilisateurController extends AbstractController
         $utilisateur->setRole($roleRepository->find($idRole));
         $utilisateur->setDateCreation($dateTime);
         $utilisateur->setEstActive(true);
+        $utilisateur->setApiToken(bin2hex(random_bytes(8)));
 
         // Hachage du mot de passe avant de le stocker
         $hashedPassword = hash('sha256', $utilisateur->getMotDePasse());
