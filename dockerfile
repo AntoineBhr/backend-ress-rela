@@ -1,41 +1,40 @@
-FROM php:8.2-cli
+# Utilisez l'image PHP officielle avec FPM
+FROM php:8.2-fpm
 
 # Installez les extensions PHP requises
-RUN docker-php-ext-install pdo pdo_mysql
-
-# Installez les outils nécessaires pour Composer
 RUN apt-get update && \
     apt-get install -y \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libicu-dev \
+    g++ \
     git \
     unzip \
-    zip \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd \
+    && docker-php-ext-install intl pdo pdo_mysql zip
 
 # Installez Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Créez un utilisateur non root
 RUN useradd -ms /bin/bash appuser
 
 # Copiez les fichiers de l'application
-COPY . /var/www
+COPY . /var/www/html
 
 # Changez le propriétaire des fichiers
-RUN chown -R appuser:appuser /var/www
+RUN chown -R appuser:appuser /var/www/html
 
 # Déplacez-vous dans le répertoire de l'application
-WORKDIR /var/www
+WORKDIR /var/www/html
 
-# Installez les dépendances sans scripts en tant que root
-RUN composer install --prefer-dist --no-scripts --no-progress
+# Installez les dépendances PHP
+RUN composer install --prefer-dist --no-progress --no-scripts
 
-# Changez l'utilisateur pour appuser
-USER appuser
-
-# Exécutez les scripts de Composer en tant que appuser
-RUN composer run-script post-install-cmd
-
-# Exposez le port
+# Exposez le port pour PHP-FPM
 EXPOSE 9000
 
 # Commande par défaut
