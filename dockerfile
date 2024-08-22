@@ -17,6 +17,9 @@ WORKDIR /var/www
 # Copy application source
 COPY . .
 
+# Installez Symfony Runtime
+RUN composer require symfony/runtime
+
 # Install application dependencies
 RUN composer install --prefer-dist --no-progress
 
