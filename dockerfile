@@ -21,7 +21,7 @@ COPY . .
 RUN composer require symfony/runtime
 
 # Install application dependencies
-RUN composer install --prefer-dist --no-progress
+RUN composer install --prefer-dist --no-progress --no-scripts
 
 # Expose port
 EXPOSE 9000
