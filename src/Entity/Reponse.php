@@ -25,7 +25,7 @@ class Reponse
     private ?\DateTimeInterface $dateReponse = null;
 
     #[ORM\ManyToOne(inversedBy: 'reponses')]
-    private ?Utilisateur $utilisateur = null;
+    private ?User $utilisateur = null;
 
     #[ORM\ManyToOne(inversedBy: 'reponses')]
     #[ORM\JoinColumn(nullable: false)]
@@ -60,12 +60,12 @@ class Reponse
         return $this;
     }
 
-    public function getUtilisateur(): ?Utilisateur
+    public function getUtilisateur(): ?User
     {
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(?Utilisateur $utilisateur): static
+    public function setUtilisateur(?User $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
 

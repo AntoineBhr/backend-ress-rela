@@ -5,16 +5,17 @@ namespace App\DataFixtures;
 use DateTime;
 use DateTimeZone;
 use App\Entity\Role;
+use App\Entity\User;
+use App\Entity\Reponse;
 use App\Entity\Categorie;
+use App\Entity\Ressource;
 use App\Entity\Commentaire;
 use App\Entity\Utilisateur;
 use App\Entity\TypeRelation;
 use App\Entity\EtatRessource;
+use App\Entity\TypeRessource;
 use App\Entity\MessageUtilisateur;
 use App\Entity\RelationUtilisateur;
-use App\Entity\Reponse;
-use App\Entity\Ressource;
-use App\Entity\TypeRessource;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 
@@ -118,68 +119,65 @@ class AppFixtures extends Fixture
         }
 
 
-        $array = array(
-            'Utilisateur',
-            'Modérateur',
-            'Administrateur',
-            'Super-Administrateur'
-        );
-        // Parcourir le tableau et assigner les valeurs aux objets Role
-        $roleForUser = null;
-        foreach ($array as $value) {
+        // $array = array(
+        //     'Utilisateur',
+        //     'Modérateur',
+        //     'Administrateur',
+        //     'Super-Administrateur'
+        // );
+        // // Parcourir le tableau et assigner les valeurs aux objets Role
+        // $roleForUser = null;
+        // foreach ($array as $value) {
             
-            $role = new Role();
-            $role->setNom($value);
+        //     $role = new Role();
+        //     $role->setNom($value);
 
-            if($value == 'Utilisateur'){
-                $roleForUser = $role;
-            }
-            $manager->persist($role);
-        }
+        //     if($value == 'Utilisateur'){
+        //         $roleForUser = $role;
+        //     }
+        //     $manager->persist($role);
+        // }
 
         $dateTime = new DateTime('now', new DateTimeZone('Europe/Paris'));
 
         //Partie Utilisateur
 
 
-        $utilisateur1 = new Utilisateur();
+        $utilisateur1 = new User();
         $utilisateur1->setPrenom('Michel')
             ->setNom('Patrick')
-            ->setMail('m.p@gmail.com')
-            ->setMotDePasse('123')
+            ->setEmail('m.p@gmail.com')
+            ->setPassword('123')
             ->setDepartement('Loiret')
             ->setDateCreation($dateTime)
             ->setEstActive(true)
-            ->setRole($roleForUser)
             ->setApiToken(bin2hex(random_bytes(8)))
 
         ;
         $manager->persist($utilisateur1);
 
 
-        $utilisateur2 = new Utilisateur();
+        $utilisateur2 = new User();
         $utilisateur2->setPrenom('Laurent')
             ->setNom('Delaru')
-            ->setMail('l.d@gmail.com')
-            ->setMotDePasse('azerty')
+            ->setEmail('l.d@gmail.com')
+            ->setPassword('azerty')
             ->setDepartement('Ile de france')
             ->setDateCreation($dateTime)
             ->setEstActive(true)
-            ->setRole($roleForUser)
             ->setApiToken(bin2hex(random_bytes(8)))
 
         ;
         $manager->persist($utilisateur2);
 
-        $utilisateur = new Utilisateur();
+        $utilisateur = new User();
         $utilisateur->setPrenom('Bernard')
             ->setNom('Pavu')
-            ->setMail('b.p@gmail.com')
-            ->setMotDePasse('rootroot')
+            ->setEmail('b.p@gmail.com')
+            ->setPassword('rootroot')
             ->setDepartement('Normandie')
             ->setDateCreation($dateTime)
             ->setEstActive(true)
-            ->setRole($roleForUser)
             ->setApiToken(bin2hex(random_bytes(8)))
 
         ;
