@@ -18,9 +18,20 @@ use App\Entity\MessageUtilisateur;
 use App\Entity\RelationUtilisateur;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+
+    private UserPasswordHasherInterface $userPasswordHasherInterface;
+
+    // Injectez UserPasswordHasherInterface via le constructeur
+    public function __construct(UserPasswordHasherInterface $userPasswordHasherInterface)
+    {
+        $this->userPasswordHasherInterface = $userPasswordHasherInterface;
+    }
+
+
     public function load(ObjectManager $manager): void
     {
 
@@ -154,6 +165,8 @@ class AppFixtures extends Fixture
             ->setApiToken(bin2hex(random_bytes(8)))
 
         ;
+        $hashedPassword = $this->userPasswordHasherInterface->hashPassword($utilisateur1, $utilisateur1->getPassword());
+        $utilisateur1->setPassword($hashedPassword);
         $manager->persist($utilisateur1);
 
 
@@ -168,10 +181,12 @@ class AppFixtures extends Fixture
             ->setApiToken(bin2hex(random_bytes(8)))
 
         ;
+        $hashedPassword = $this->userPasswordHasherInterface->hashPassword($utilisateur2, $utilisateur2->getPassword());
+        $utilisateur2->setPassword($hashedPassword);
         $manager->persist($utilisateur2);
 
-        $utilisateur = new User();
-        $utilisateur->setPrenom('Bernard')
+        $utilisateur3 = new User();
+        $utilisateur3->setPrenom('Bernard')
             ->setNom('Pavu')
             ->setEmail('b.p@gmail.com')
             ->setPassword('rootroot')
@@ -181,7 +196,9 @@ class AppFixtures extends Fixture
             ->setApiToken(bin2hex(random_bytes(8)))
 
         ;
-        $manager->persist($utilisateur);
+        $hashedPassword = $this->userPasswordHasherInterface->hashPassword($utilisateur3, $utilisateur3->getPassword());
+        $utilisateur3->setPassword($hashedPassword);
+        $manager->persist($utilisateur3);
 
 
         // //Partie Ressource
@@ -278,7 +295,7 @@ class AppFixtures extends Fixture
         $relationUtilisateur = new RelationUtilisateur();
         $relationUtilisateur->setIdTypeRelation($typeRelationForRessource)
             ->setIdUtilisateur1($utilisateur1)
-            ->setIdUtilisateur2($utilisateur)
+            ->setIdUtilisateur2($utilisateur3)
             ->setEstAccepte(false)
 
         ;
@@ -288,7 +305,7 @@ class AppFixtures extends Fixture
         $relationUtilisateur = new RelationUtilisateur();
         $relationUtilisateur->setIdTypeRelation($typeRelationForRessource)
             ->setIdUtilisateur1($utilisateur2)
-            ->setIdUtilisateur2($utilisateur)
+            ->setIdUtilisateur2($utilisateur3)
             ->setEstAccepte(true)
 
         ;

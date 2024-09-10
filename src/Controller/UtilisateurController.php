@@ -18,6 +18,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/utilisateur')]
 class UtilisateurController extends AbstractController
@@ -38,7 +39,7 @@ class UtilisateurController extends AbstractController
     }
 
     #[Route('/user/CheckUser', name: 'app_utilisateur_check_user', methods: ['POST'])]
-    public function checkUser(Request $request, UserRepository $utilisateurRepository, SerializerInterface $serializer): Response
+    public function checkUser(Request $request, UserRepository $utilisateurRepository, SerializerInterface $serializer, UserPasswordHasherInterface $userPasswordHasherInterface): Response
     {
         $login = $request->get('login');
         $password = $request->get('password');
@@ -47,10 +48,17 @@ class UtilisateurController extends AbstractController
         // $hashedPassword = hash('sha256', $password);
 
         // Recherche de l'utilisateur avec l'adresse email et le mot de passe haché
-        $user = $utilisateurRepository->findOneBy(['email' => $login, 'password' => $password]);
+        $user = $utilisateurRepository->findOneBy(['email' => $login]);
 
-        $jsonUsers = $serializer->serialize($user, 'json', ['groups' => 'CheckUser']);
-        return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
+        $isValid = $userPasswordHasherInterface->isPasswordValid($user, $password);
+
+        if($isValid){
+            $jsonUsers = $serializer->serialize($user, 'json', ['groups' => 'CheckUser']);
+            return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
+        }else{
+            return Response::HTTP_NOT_FOUND;
+        }
+        
     }
 
     #[Route('/user/SearchUser', name: 'app_utilisateur_search_user', methods: ['POST'])]
@@ -70,12 +78,11 @@ class UtilisateurController extends AbstractController
     }
 
     #[Route('/', name: 'app_utilisateur_new', methods: ['POST'])]
-    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator): JsonResponse
+    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UserPasswordHasherInterface $userPasswordHasherInterface): JsonResponse
     {
         $utilisateur = $serializer->deserialize($request->getContent(), User::class, 'json');
 
         $content = $request->toArray();
-        $idRole = $content['id_role'] ?? 1;
         $dateTime = new DateTime('now', new DateTimeZone('Europe/Paris'));
 
         $utilisateur->setDateCreation($dateTime);
@@ -83,8 +90,10 @@ class UtilisateurController extends AbstractController
         $utilisateur->setApiToken(bin2hex(random_bytes(8)));
 
         // Hachage du mot de passe avant de le stocker
-        $hashedPassword = hash('sha256', $utilisateur->getMotDePasse());
-        $utilisateur->setMotDePasse($hashedPassword);
+        $hashedPassword = $userPasswordHasherInterface->hashPassword($utilisateur, $utilisateur->getPassword());
+        $utilisateur->setPassword($hashedPassword);
+
+
 
         $em->persist($utilisateur);
         $em->flush();
@@ -108,12 +117,12 @@ class UtilisateurController extends AbstractController
 
 
         // Hachage du nouveau mot de passe si présent
-        if (isset($content['motDePasse']) && !empty($content['motDePasse'])) {
-            $hashedPassword = hash('sha256', $content['motDePasse']);
-            $updatedUtilisateur->setMotDePasse($hashedPassword);
-        } else {
-            $updatedUtilisateur->setMotDePasse($psw);
-        }
+        // if (isset($content['motDePasse']) && !empty($content['motDePasse'])) {
+        //     $hashedPassword = hash('sha256', $content['motDePasse']);
+        //     $updatedUtilisateur->setMotDePasse($hashedPassword);
+        // } else {
+        //     $updatedUtilisateur->setMotDePasse($psw);
+        // }
 
         $em->persist($updatedUtilisateur);
         $em->flush();
