@@ -128,9 +128,8 @@ class UtilisateurControllerTest extends WebTestCase
             'nom' => 'test',
             'prenom' => 'prenomTest',
             'mail' => 'pt.t@gmail.com',
-            'motDePasse' => 'test',
+            'password' => 'test',
             'departement' => 'Test',
-            'id_role' => 1
         ];
         $json = json_encode($data);
 
