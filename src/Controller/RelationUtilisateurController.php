@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\RelationUtilisateurRepository;
+use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -41,7 +42,7 @@ class RelationUtilisateurController extends AbstractController
     }
 
     #[Route('/user/{id}', name: 'app_list_relations_utilisateur_show', methods: ['GET'])]
-    public function showUserRelation(UtilisateurRepository $utilisateurRepository, RelationUtilisateurRepository $relationUtilisateurRepository, int $id,SerializerInterface $serializer){
+    public function showUserRelation(UserRepository $utilisateurRepository, RelationUtilisateurRepository $relationUtilisateurRepository, int $id,SerializerInterface $serializer){
 
 
 
@@ -93,7 +94,7 @@ class RelationUtilisateurController extends AbstractController
 
 
     #[Route('/', name: 'app_relation_utilisateur_new', methods: ['POST'])]
-    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UtilisateurRepository $utilisateurRepository, TypeRelationRepository $typeRelationRepository): JsonResponse
+    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UserRepository $utilisateurRepository, TypeRelationRepository $typeRelationRepository): JsonResponse
     {
 
         // $relationUtilisateur = $serializer->deserialize($request->getContent(), RelationUtilisateur::class, 'json');

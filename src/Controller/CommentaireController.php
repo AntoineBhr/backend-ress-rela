@@ -9,6 +9,7 @@ use App\Form\CommentaireType;
 use App\Repository\RessourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\CommentaireRepository;
+use App\Repository\UserRepository;
 use App\Repository\UtilisateurRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,7 +43,7 @@ class CommentaireController extends AbstractController
     }
 
     #[Route('/', name: 'app_commentaire_new', methods: ['POST'])]
-    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository, RessourceRepository $ressourceRepository, UrlGeneratorInterface $urlGenerator): Response
+    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UserRepository $utilisateurRepository, RessourceRepository $ressourceRepository, UrlGeneratorInterface $urlGenerator): Response
     {
         $commentaire = $serializer->deserialize($request->getContent(), Commentaire::class, 'json');
 

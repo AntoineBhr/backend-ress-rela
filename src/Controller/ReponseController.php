@@ -9,6 +9,7 @@ use App\Form\ReponseType;
 use App\Repository\ReponseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\CommentaireRepository;
+use App\Repository\UserRepository;
 use App\Repository\UtilisateurRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,7 +47,7 @@ class ReponseController extends AbstractController
 
 
     #[Route('/', name: 'app_reponse_new', methods: ['POST'])]
-    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository, CommentaireRepository $commentaireRepository, UrlGeneratorInterface $urlGenerator): Response
+    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UserRepository $utilisateurRepository, CommentaireRepository $commentaireRepository, UrlGeneratorInterface $urlGenerator): Response
     {
         $reponse = $serializer->deserialize($request->getContent(), Reponse::class, 'json');
 

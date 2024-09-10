@@ -5,6 +5,7 @@ namespace App\Controller;
 use DateTime;
 use DateTimeZone;
 use App\Entity\Ressource;
+use App\Entity\User;
 use App\Form\RessourceType;
 use App\Repository\CategorieRepository;
 use App\Repository\RessourceRepository;
@@ -13,6 +14,7 @@ use App\Repository\UtilisateurRepository;
 use App\Repository\TypeRelationRepository;
 use App\Repository\EtatRessourceRepository;
 use App\Repository\TypeRessourceRepository;
+use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -47,7 +49,7 @@ class RessourceController extends AbstractController
     }
 
     #[Route('/ressources-user/{id}', name: 'app_ressource_user_show', methods: ['GET'])]
-    public function showRessourcesFromUser(Request $request, RessourceRepository $ressourceRepository, UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer): Response
+    public function showRessourcesFromUser(Request $request, RessourceRepository $ressourceRepository, UserRepository $utilisateurRepository, SerializerInterface $serializer): Response
     {
         $id = $request->get('id');
         $user = $utilisateurRepository->findOneBy(['id'=> $id]);
@@ -62,7 +64,7 @@ class RessourceController extends AbstractController
 
 
     #[Route('/', name: 'app_ressource_new', methods: ['POST'])]
-    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UtilisateurRepository $utilisateurRepository, CategorieRepository $categorieRepository, TypeRelationRepository $typeRelationRepository, EtatRessourceRepository $etatRessourceRepository, TypeRessourceRepository $typeRessource): JsonResponse
+    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UserRepository $utilisateurRepository, CategorieRepository $categorieRepository, TypeRelationRepository $typeRelationRepository, EtatRessourceRepository $etatRessourceRepository, TypeRessourceRepository $typeRessource): JsonResponse
     {
 
         $ressource = $serializer->deserialize($request->getContent(), Ressource::class, 'json');
@@ -104,7 +106,7 @@ class RessourceController extends AbstractController
 
 
     #[Route('/{id}', name: 'app_ressource_edit', methods: ['PUT'])]
-    public function edit(Request $request, SerializerInterface $serializer, Ressource $currentRessource, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository, CategorieRepository $categorieRepository, TypeRelationRepository $typeRelationRepository, EtatRessourceRepository $etatRessourceRepository, TypeRessourceRepository $typeRessourceRepository): JsonResponse 
+    public function edit(Request $request, SerializerInterface $serializer, Ressource $currentRessource, EntityManagerInterface $em, UserRepository $utilisateurRepository, CategorieRepository $categorieRepository, TypeRelationRepository $typeRelationRepository, EtatRessourceRepository $etatRessourceRepository, TypeRessourceRepository $typeRessourceRepository): JsonResponse 
     {
         $updatedRessource = $serializer->deserialize($request->getContent(), 
                 Ressource::class, 

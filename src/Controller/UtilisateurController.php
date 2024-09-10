@@ -44,10 +44,10 @@ class UtilisateurController extends AbstractController
         $password = $request->get('password');
 
         // Hachage du mot de passe saisi par l'utilisateur avec SHA-256
-        $hashedPassword = hash('sha256', $password);
+        // $hashedPassword = hash('sha256', $password);
 
         // Recherche de l'utilisateur avec l'adresse email et le mot de passe haché
-        $user = $utilisateurRepository->findOneBy(['email' => $login, 'password' => $hashedPassword]);
+        $user = $utilisateurRepository->findOneBy(['email' => $login, 'password' => $password]);
 
         $jsonUsers = $serializer->serialize($user, 'json', ['groups' => 'CheckUser']);
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
