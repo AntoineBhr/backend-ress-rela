@@ -104,7 +104,7 @@ class UtilisateurController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_utilisateur_edit', methods: ['PUT'])]
-    public function edit(Request $request, SerializerInterface $serializer, User $currentUtilisateur, EntityManagerInterface $em): JsonResponse
+    public function edit(Request $request, SerializerInterface $serializer, User $currentUtilisateur, EntityManagerInterface $em, userPasswordHasherInterface $userPasswordHasherInterface): JsonResponse
     {
         $psw = $currentUtilisateur->getPassword();
         $updatedUtilisateur = $serializer->deserialize(
@@ -117,12 +117,13 @@ class UtilisateurController extends AbstractController
 
 
         // Hachage du nouveau mot de passe si présent
-        // if (isset($content['motDePasse']) && !empty($content['motDePasse'])) {
-        //     $hashedPassword = hash('sha256', $content['motDePasse']);
-        //     $updatedUtilisateur->setMotDePasse($hashedPassword);
-        // } else {
-        //     $updatedUtilisateur->setMotDePasse($psw);
-        // }
+        if (isset($content['motDePasse']) && !empty($content['motDePasse'])) {
+            $hashedPassword = $userPasswordHasherInterface->hashPassword($updatedUtilisateur, $content['motDePasse']);
+            $hashedPassword = hash('sha256', $content['motDePasse']);
+            $updatedUtilisateur->setPassword($hashedPassword);
+        } else {
+            $updatedUtilisateur->setPassword($psw);
+        }
 
         $em->persist($updatedUtilisateur);
         $em->flush();
