@@ -26,5 +26,5 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ghcr.io/antoinebhr/front-ressources-relationnelles/backend_image:latest .
-          docker push ghcr.io/antoinebhr/front-ressources-relationnelles/backend_image:latest
+          docker build -t ghcr.io/antoinebhr/backend-ress-rela/backend_image:latest .
+          docker push ghcr.io/antoinebhr/backend-ress-rela/backend_image:latest
