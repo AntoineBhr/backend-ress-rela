@@ -23,11 +23,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/ressource')]
+// #[Route('/ressource')]
 class RessourceController extends AbstractController
 {
-    #[Route('/', name: 'app_ressource_index', methods: ['GET'])]
+    #[Route('/ressource/', name: 'app_ressource_index', methods: ['GET'])]
     public function index(RessourceRepository $ressourceRepository, SerializerInterface $serializer): Response
     {
 
@@ -39,7 +40,7 @@ class RessourceController extends AbstractController
 
 
 
-    #[Route('/{id}', name: 'app_ressource_show', methods: ['GET'])]
+    #[Route('/ressource/{id}', name: 'app_ressource_show', methods: ['GET'])]
     public function show(Ressource $ressource, SerializerInterface $serializer): Response
     {
         $jsonUser = $serializer->serialize($ressource, 'json', ['groups' => 'Ressource']);
@@ -63,7 +64,8 @@ class RessourceController extends AbstractController
 
 
 
-    #[Route('/', name: 'app_ressource_new', methods: ['POST'])]
+    #[Route('/api-auth/ressource/new/', name: 'app_ressource_new', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UserRepository $utilisateurRepository, CategorieRepository $categorieRepository, TypeRelationRepository $typeRelationRepository, EtatRessourceRepository $etatRessourceRepository, TypeRessourceRepository $typeRessource): JsonResponse
     {
 
@@ -105,7 +107,7 @@ class RessourceController extends AbstractController
     }
 
 
-    #[Route('/{id}', name: 'app_ressource_edit', methods: ['PUT'])]
+    #[Route('/ressource/{id}', name: 'app_ressource_edit', methods: ['PUT'])]
     public function edit(Request $request, SerializerInterface $serializer, Ressource $currentRessource, EntityManagerInterface $em, UserRepository $utilisateurRepository, CategorieRepository $categorieRepository, TypeRelationRepository $typeRelationRepository, EtatRessourceRepository $etatRessourceRepository, TypeRessourceRepository $typeRessourceRepository): JsonResponse 
     {
         $updatedRessource = $serializer->deserialize($request->getContent(), 
@@ -158,7 +160,7 @@ class RessourceController extends AbstractController
 
 
 
-    #[Route('/{id}', name: 'app_ressource_delete', methods: ['DELETE'])]
+    #[Route('/ressource/{id}', name: 'app_ressource_delete', methods: ['DELETE'])]
     public function delete(Request $request, Ressource $ressource, EntityManagerInterface $entityManager): Response
     {
 

@@ -18,7 +18,7 @@ security:
     firewalls:
 
         api:
-            pattern: ^/api/
+            pattern: ^/api-auth/
             stateless: true
             custom_authenticator: App\Security\APIAuthenticator
             provider: api_user_provider

@@ -19,11 +19,12 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/utilisateur')]
+// #[Route('/utilisateur')]
 class UtilisateurController extends AbstractController
 {
-    #[Route('/', name: 'app_utilisateur_index', methods: ['GET'])]
+    #[Route('/utilisateur/', name: 'app_utilisateur_index', methods: ['GET'])]
     public function index(UserRepository $utilisateurRepository, SerializerInterface $serializer): Response
     {
         $users = $utilisateurRepository->findAll();
@@ -31,14 +32,15 @@ class UtilisateurController extends AbstractController
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/{id}', name: 'app_utilisateur_show', methods: ['GET'])]
+    #[Route('/api-auth/utilisateur/{id}', name: 'app_utilisateur_show', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function show(User $utilisateur, SerializerInterface $serializer): Response
     {
         $jsonUser = $serializer->serialize($utilisateur, 'json', ['groups' => 'Utilisateur']);
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/user/CheckUser', name: 'app_utilisateur_check_user', methods: ['POST'])]
+    #[Route('utilisateur/user/CheckUser', name: 'app_utilisateur_check_user', methods: ['POST'])]
     public function checkUser(Request $request, UserRepository $utilisateurRepository, SerializerInterface $serializer, UserPasswordHasherInterface $userPasswordHasherInterface): Response
     {
         $login = $request->get('login');
@@ -61,7 +63,7 @@ class UtilisateurController extends AbstractController
         
     }
 
-    #[Route('/user/SearchUser', name: 'app_utilisateur_search_user', methods: ['POST'])]
+    #[Route('utilisateur/user/SearchUser', name: 'app_utilisateur_search_user', methods: ['POST'])]
     public function getSearchUser(Request $request, UserRepository $utilisateurRepository, SerializerInterface $serializer): Response
     {
         $valueUser = $request->getContent();
@@ -77,7 +79,7 @@ class UtilisateurController extends AbstractController
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/', name: 'app_utilisateur_new', methods: ['POST'])]
+    #[Route('utilisateur/', name: 'app_utilisateur_new', methods: ['POST'])]
     public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UserPasswordHasherInterface $userPasswordHasherInterface): JsonResponse
     {
         $utilisateur = $serializer->deserialize($request->getContent(), User::class, 'json');
@@ -103,7 +105,7 @@ class UtilisateurController extends AbstractController
         return new JsonResponse($jsonBook, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
-    #[Route('/{id}', name: 'app_utilisateur_edit', methods: ['PUT'])]
+    #[Route('utilisateur/{id}', name: 'app_utilisateur_edit', methods: ['PUT'])]
     public function edit(Request $request, SerializerInterface $serializer, User $currentUtilisateur, EntityManagerInterface $em, userPasswordHasherInterface $userPasswordHasherInterface): JsonResponse
     {
         $psw = $currentUtilisateur->getPassword();
@@ -131,7 +133,7 @@ class UtilisateurController extends AbstractController
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
-    #[Route('/{id}', name: 'app_utilisateur_delete', methods: ['DELETE'])]
+    #[Route('utilisateur/{id}', name: 'app_utilisateur_delete', methods: ['DELETE'])]
     public function delete(Request $request, User $utilisateur, EntityManagerInterface $entityManager): Response
     {
         $entityManager->remove($utilisateur);
