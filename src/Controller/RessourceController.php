@@ -49,7 +49,7 @@ class RessourceController extends AbstractController
         
     }
 
-    #[Route('/ressources-user/{id}', name: 'app_ressource_user_show', methods: ['GET'])]
+    #[Route('/ressource/ressources-user/{id}', name: 'app_ressource_user_show', methods: ['GET'])]
     public function showRessourcesFromUser(Request $request, RessourceRepository $ressourceRepository, UserRepository $utilisateurRepository, SerializerInterface $serializer): Response
     {
         $id = $request->get('id');
@@ -96,7 +96,6 @@ class RessourceController extends AbstractController
                 $ressource->addTypeRelation($typeRelationRepository->find($idTypeRelation));
             }
         }
-        
 
         $em->persist($ressource);
         $em->flush();
