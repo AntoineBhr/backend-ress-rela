@@ -1,0 +1,39 @@
+version: '3.8'
+
+networks:
+  net-cesi0:
+    driver: bridge
+
+services:
+  # Service pour la base de données MySQL
+  bdd_cesi0:
+    image: mysql:8.2
+    container_name: bdd_cesi0
+    hostname: bdd_cesi0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ress_rela_sy
+    volumes:
+      - save_bdd_cesi0:/var/lib/mysql
+    networks:
+      - net-cesi0
+
+  # Service pour l'application
+  app_cesi0:
+    image: image_back_cesi0
+    container_name: app_cesi0
+    hostname: app_cesi0
+    environment:
+      DATABASE_IP: bdd_cesi0
+    ports:
+      - "4000:4000"
+    depends_on:
+      - bdd_cesi0
+    networks:
+      - net-cesi0
+
+volumes:
+  save_bdd_cesi0:
+
+networks:
+  net-cesi0:
