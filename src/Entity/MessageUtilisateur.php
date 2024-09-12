@@ -23,11 +23,11 @@ class MessageUtilisateur
     #[ORM\ManyToOne(inversedBy: 'messageUtilisateurs')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["MessageUtilisateur"])]
-    private ?Utilisateur $utilisateur1 = null;
+    private ?User $utilisateur1 = null;
 
     #[ORM\ManyToOne(inversedBy: 'messageUtilisateurs')]
     #[Groups(["MessageUtilisateur"])]
-    private ?Utilisateur $utilisateur2 = null;
+    private ?User $utilisateur2 = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(["MessageUtilisateur"])]
@@ -50,24 +50,24 @@ class MessageUtilisateur
         return $this;
     }
 
-    public function getUtilisateur1(): ?Utilisateur
+    public function getUtilisateur1(): ?User
     {
         return $this->utilisateur1;
     }
 
-    public function setUtilisateur1(?Utilisateur $utilisateur1): static
+    public function setUtilisateur1(?User $utilisateur1): static
     {
         $this->utilisateur1 = $utilisateur1;
 
         return $this;
     }
 
-    public function getUtilisateur2(): ?Utilisateur
+    public function getUtilisateur2(): ?User
     {
         return $this->utilisateur2;
     }
 
-    public function setUtilisateur2(?Utilisateur $utilisateur2): static
+    public function setUtilisateur2(?User $utilisateur2): static
     {
         $this->utilisateur2 = $utilisateur2;
 

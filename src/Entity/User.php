@@ -2,21 +2,46 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\UtilisateurRepository;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
-#[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
-class Utilisateur
+
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["CheckUser","Utilisateur","Ressource", "Roles", "Categorie", "TypeRelation", "RelationUtilisateur", "MessageUtilisateur", "EtatRessource", "TypeRessource"])]
+    #[Groups(["CheckUser","Utilisateur"])]
     private ?int $id = null;
+
+    #[ORM\Column(length: 180)]
+    #[Groups(["CheckUser","Utilisateur"])]
+    private ?string $email = null;
+
+    /**
+     * @var list<string> The user roles
+     */
+    #[ORM\Column]
+    #[Groups(["CheckUser","Utilisateur"])]
+    private array $roles = [];
+
+    /**
+     * @var string The hashed password
+     */
+    #[Groups(["CheckUser","Utilisateur"])]
+    #[ORM\Column]
+    private ?string $password = null;
+
+    #[Groups(["CheckUser","Utilisateur"])]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $apiToken = null;
 
     #[Groups(["CheckUser","Utilisateur","Ressource", "Roles", "Categorie", "TypeRelation", "RelationUtilisateur", "MessageUtilisateur", "EtatRessource", "TypeRessource"])]
     #[ORM\Column(length: 255)]
@@ -25,14 +50,6 @@ class Utilisateur
     #[Groups(["CheckUser","Utilisateur","Ressource", "Roles", "Categorie", "TypeRelation", "RelationUtilisateur", "MessageUtilisateur", "EtatRessource", "TypeRessource"])]
     #[ORM\Column(length: 255)]
     private ?string $prenom = null;
-
-    #[Groups(["CheckUser","Utilisateur"])]
-    #[ORM\Column(length: 255, unique: true)]
-    private ?string $mail = null;
-
-    #[Groups(["Utilisateur"])]
-    #[ORM\Column(length: 1000)]
-    private ?string $motDePasse = null;
 
     #[Groups(["CheckUser","Utilisateur"])]
     #[ORM\Column(length: 255)]
@@ -51,10 +68,6 @@ class Utilisateur
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateDesactivation = null;
 
-    #[Groups(["CheckUser","Utilisateur"])]
-    #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Role $role = null;
 
     /**
      * @var Collection<int, Ressource>
@@ -62,6 +75,7 @@ class Utilisateur
     #[ORM\OneToMany(targetEntity: Ressource::class, mappedBy: 'utilisateur', orphanRemoval: true)]
     #[Groups(["Utilisateur"])]
     private Collection $ressources;
+
 
     /**
      * @var Collection<int, RelationUtilisateur>
@@ -87,18 +101,92 @@ class Utilisateur
     #[ORM\OneToMany(targetEntity: Reponse::class, mappedBy: 'utilisateur')]
     private Collection $reponses;
 
-    public function __construct()
-    {
-        $this->ressources = new ArrayCollection();
-        $this->relationUtilisateurs = new ArrayCollection();
-        $this->messageUtilisateurs = new ArrayCollection();
-        $this->commentaires = new ArrayCollection();
-        $this->reponses = new ArrayCollection();
-    }
+
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     * @return list<string>
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(?string $apiToken): static
+    {
+        $this->apiToken = $apiToken;
+
+        return $this;
     }
 
     public function getNom(): ?string
@@ -125,30 +213,7 @@ class Utilisateur
         return $this;
     }
 
-    public function getMail(): ?string
-    {
-        return $this->mail;
-    }
-
-    public function setMail(string $mail): static
-    {
-        $this->mail = $mail;
-
-        return $this;
-    }
-
-    public function getMotDePasse(): ?string
-    {
-        return $this->motDePasse;
-    }
-
-    public function setMotDePasse(string $motDePasse): static
-    {
-        $this->motDePasse = $motDePasse;
-
-        return $this;
-    }
-
+    
     public function getDepartement(): ?string
     {
         return $this->departement;
@@ -197,17 +262,6 @@ class Utilisateur
         return $this;
     }
 
-    public function getRole(): ?Role
-    {
-        return $this->role;
-    }
-
-    public function setRole(?Role $role): static
-    {
-        $this->role = $role;
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Ressource>
@@ -358,4 +412,5 @@ class Utilisateur
 
         return $this;
     }
+
 }

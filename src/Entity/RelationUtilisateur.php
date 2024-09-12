@@ -27,12 +27,12 @@ class RelationUtilisateur
     #[ORM\ManyToOne(inversedBy: 'relationUtilisateurs')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["RelationUtilisateur"])]
-    private ?Utilisateur $id_utilisateur_1 = null;
+    private ?User $id_utilisateur_1 = null;
 
     #[ORM\ManyToOne(inversedBy: 'relationUtilisateurs')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["RelationUtilisateur"])]
-    private ?Utilisateur $id_utilisateur_2 = null;
+    private ?User $id_utilisateur_2 = null;
 
     public function getId(): ?int
     {
@@ -63,24 +63,24 @@ class RelationUtilisateur
         return $this;
     }
 
-    public function getIdUtilisateur1(): ?Utilisateur
+    public function getIdUtilisateur1(): ?User
     {
         return $this->id_utilisateur_1;
     }
 
-    public function setIdUtilisateur1(?Utilisateur $id_utilisateur_1): static
+    public function setIdUtilisateur1(?User $id_utilisateur_1): static
     {
         $this->id_utilisateur_1 = $id_utilisateur_1;
 
         return $this;
     }
 
-    public function getIdUtilisateur2(): ?Utilisateur
+    public function getIdUtilisateur2(): ?User
     {
         return $this->id_utilisateur_2;
     }
 
-    public function setIdUtilisateur2(?Utilisateur $id_utilisateur_2): static
+    public function setIdUtilisateur2(?User $id_utilisateur_2): static
     {
         $this->id_utilisateur_2 = $id_utilisateur_2;
 

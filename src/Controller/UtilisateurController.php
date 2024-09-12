@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use DateTime;
 use DateTimeZone;
 use App\Entity\Utilisateur;
 use App\Repository\RoleRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\UtilisateurRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,43 +18,53 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/utilisateur')]
+// #[Route('/utilisateur')]
 class UtilisateurController extends AbstractController
 {
-    #[Route('/', name: 'app_utilisateur_index', methods: ['GET'])]
-    public function index(UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer): Response
+    #[Route('/utilisateur/', name: 'app_utilisateur_index', methods: ['GET'])]
+    public function index(UserRepository $utilisateurRepository, SerializerInterface $serializer): Response
     {
         $users = $utilisateurRepository->findAll();
         $jsonUsers = $serializer->serialize($users, 'json', ['groups' => 'Utilisateur']);
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/{id}', name: 'app_utilisateur_show', methods: ['GET'])]
-    public function show(Utilisateur $utilisateur, SerializerInterface $serializer): Response
+    #[Route('/api-auth/utilisateur/{id}', name: 'app_utilisateur_show', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function show(User $utilisateur, SerializerInterface $serializer): Response
     {
         $jsonUser = $serializer->serialize($utilisateur, 'json', ['groups' => 'Utilisateur']);
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/user/CheckUser', name: 'app_utilisateur_check_user', methods: ['POST'])]
-    public function checkUser(Request $request, UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer): Response
+    #[Route('utilisateur/user/CheckUser', name: 'app_utilisateur_check_user', methods: ['POST'])]
+    public function checkUser(Request $request, UserRepository $utilisateurRepository, SerializerInterface $serializer, UserPasswordHasherInterface $userPasswordHasherInterface): Response
     {
         $login = $request->get('login');
         $password = $request->get('password');
 
         // Hachage du mot de passe saisi par l'utilisateur avec SHA-256
-        $hashedPassword = hash('sha256', $password);
+        // $hashedPassword = hash('sha256', $password);
 
         // Recherche de l'utilisateur avec l'adresse email et le mot de passe haché
-        $user = $utilisateurRepository->findOneBy(['mail' => $login, 'motDePasse' => $hashedPassword]);
+        $user = $utilisateurRepository->findOneBy(['email' => $login]);
 
-        $jsonUsers = $serializer->serialize($user, 'json', ['groups' => 'CheckUser']);
-        return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
+        $isValid = $userPasswordHasherInterface->isPasswordValid($user, $password);
+
+        if($isValid){
+            $jsonUsers = $serializer->serialize($user, 'json', ['groups' => 'CheckUser']);
+            return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
+        }else{
+            return Response::HTTP_NOT_FOUND;
+        }
+        
     }
 
-    #[Route('/user/SearchUser', name: 'app_utilisateur_search_user', methods: ['POST'])]
-    public function getSearchUser(Request $request, UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer): Response
+    #[Route('utilisateur/user/SearchUser', name: 'app_utilisateur_search_user', methods: ['POST'])]
+    public function getSearchUser(Request $request, UserRepository $utilisateurRepository, SerializerInterface $serializer): Response
     {
         $valueUser = $request->getContent();
         $data = json_decode($valueUser, true);
@@ -67,22 +79,23 @@ class UtilisateurController extends AbstractController
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/', name: 'app_utilisateur_new', methods: ['POST'])]
-    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, RoleRepository $roleRepository): JsonResponse
+    #[Route('utilisateur/', name: 'app_utilisateur_new', methods: ['POST'])]
+    public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UserPasswordHasherInterface $userPasswordHasherInterface): JsonResponse
     {
-        $utilisateur = $serializer->deserialize($request->getContent(), Utilisateur::class, 'json');
+        $utilisateur = $serializer->deserialize($request->getContent(), User::class, 'json');
 
         $content = $request->toArray();
-        $idRole = $content['id_role'] ?? 1;
         $dateTime = new DateTime('now', new DateTimeZone('Europe/Paris'));
 
-        $utilisateur->setRole($roleRepository->find($idRole));
         $utilisateur->setDateCreation($dateTime);
         $utilisateur->setEstActive(true);
+        $utilisateur->setApiToken(bin2hex(random_bytes(8)));
 
         // Hachage du mot de passe avant de le stocker
-        $hashedPassword = hash('sha256', $utilisateur->getMotDePasse());
-        $utilisateur->setMotDePasse($hashedPassword);
+        $hashedPassword = $userPasswordHasherInterface->hashPassword($utilisateur, $utilisateur->getPassword());
+        $utilisateur->setPassword($hashedPassword);
+
+
 
         $em->persist($utilisateur);
         $em->flush();
@@ -92,26 +105,26 @@ class UtilisateurController extends AbstractController
         return new JsonResponse($jsonBook, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
-    #[Route('/{id}', name: 'app_utilisateur_edit', methods: ['PUT'])]
-    public function edit(Request $request, SerializerInterface $serializer, Utilisateur $currentUtilisateur, EntityManagerInterface $em, RoleRepository $authorRepository): JsonResponse
+    #[Route('utilisateur/{id}', name: 'app_utilisateur_edit', methods: ['PUT'])]
+    public function edit(Request $request, SerializerInterface $serializer, User $currentUtilisateur, EntityManagerInterface $em, userPasswordHasherInterface $userPasswordHasherInterface): JsonResponse
     {
-        $psw = $currentUtilisateur->getMotDePasse();
+        $psw = $currentUtilisateur->getPassword();
         $updatedUtilisateur = $serializer->deserialize(
             $request->getContent(),
-            Utilisateur::class,
+            User::class,
             'json',
             [AbstractNormalizer::OBJECT_TO_POPULATE => $currentUtilisateur]
         );
         $content = $request->toArray();
-        $idRole = $content['id_role'] ?? 1;
-        $updatedUtilisateur->setRole($authorRepository->find($idRole));
+
 
         // Hachage du nouveau mot de passe si présent
         if (isset($content['motDePasse']) && !empty($content['motDePasse'])) {
+            $hashedPassword = $userPasswordHasherInterface->hashPassword($updatedUtilisateur, $content['motDePasse']);
             $hashedPassword = hash('sha256', $content['motDePasse']);
-            $updatedUtilisateur->setMotDePasse($hashedPassword);
+            $updatedUtilisateur->setPassword($hashedPassword);
         } else {
-            $updatedUtilisateur->setMotDePasse($psw);
+            $updatedUtilisateur->setPassword($psw);
         }
 
         $em->persist($updatedUtilisateur);
@@ -120,8 +133,8 @@ class UtilisateurController extends AbstractController
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
-    #[Route('/{id}', name: 'app_utilisateur_delete', methods: ['DELETE'])]
-    public function delete(Request $request, Utilisateur $utilisateur, EntityManagerInterface $entityManager): Response
+    #[Route('utilisateur/{id}', name: 'app_utilisateur_delete', methods: ['DELETE'])]
+    public function delete(Request $request, User $utilisateur, EntityManagerInterface $entityManager): Response
     {
         $entityManager->remove($utilisateur);
         $entityManager->flush();
