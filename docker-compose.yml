@@ -31,9 +31,23 @@ services:
       - bdd_cesi0
     networks:
       - net-cesi0
-
+  
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=false
+      - WATCHTOWER_POLL_INTERVAL=300
+      # Identifiants pour le repository du backend
+      - REPO_USER_BACKEND=AntoineBhr 
+      - REPO_PASS_BACKEND=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
+      # Identifiants pour le repository du frontend
+      - REPO_USER_FRONTEND=AntoineBhr 
+      - REPO_PASS_FRONTEND=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
+    command: --interval 300 
+  
 volumes:
   save_bdd_cesi0:
 
-networks:
-  net-cesi0:
